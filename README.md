@@ -1,3 +1,6 @@
+### ⚠️ Note that the Python script is dependant on the html structure of Craigslist.
+###  The script may not work if Craigslist changes its html structure from what it had on August 11, 2020.
+
 # Let's Scrape Craigslist!
 
 ## Objective
