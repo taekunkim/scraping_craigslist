@@ -126,12 +126,19 @@ def search_all_pages():
         sleep(randint(1,5))
 
 search_all_pages()
-latest = pd.DataFrame(data = data)
+current = pd.DataFrame(data = data)
+
+
+
+
 
 past = pd.read_csv('tracking.csv')
-combined = pd.concat([past, latest], sort = False)
-combined = combined.groupby(['id', 'date']).first()
+cols = ['names', 'prices', 'dates', 'locations', 'urls', 'imgs', 'ids']
+
+duplicate_old = past.merge(current, how = 'left', on = cols).dropna().drop('last_seen_y', axis = 1)
+duplicate_old = duplicate_old.rename(columns = {'last_seen_x':'last_seen'})
+
+past_unique = pd.concat([past, duplicate_old, duplicate_old]).drop_duplicates(keep = False)
+
+combined = pd.concat([past_unique, current])
 combined.to_csv('tracking.csv')
-
-
-# In[ ]:
