@@ -1,6 +1,5 @@
 import requests
 from bs4 import BeautifulSoup
-from selenium import webdriver
 import pandas as pd
 from datetime import datetime
 import time
@@ -145,10 +144,11 @@ current = pd.DataFrame(data = data)
 past = pd.read_csv('tracking.csv')
 cols = ['id', 'name', 'price', 'date', 'location', 'url', 'images']
 
+current['id']=current['id'].astype(int)
 duplicate_old = past.merge(current, how = 'left', on = cols).dropna().drop('last_seen_y', axis = 1)
-duplicate_old = duplicate_old.rename(columns = {'last_seen_x':'last_seen'})
+duplicate_old = duplicate_old.rename(columns = {'last_seen_x': 'last_seen'})
 
-past_unique = pd.concat([past, duplicate_old, duplicate_old], sort = True).drop_duplicates(keep = False)
+past_unique = pd.concat([past, duplicate_old, duplicate_old], sort = False).drop_duplicates(keep = False)
 
-combined = pd.concat([past_unique, current], sort = True)
-combined.to_csv('tracking.csv')
+combined = pd.concat([past_unique, current], sort = False)
+combined.to_csv('tracking.csv', index = False)
