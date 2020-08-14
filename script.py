@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 from selenium import webdriver
 import pandas as pd
 from datetime import datetime
-from time import sleep
+import time
 import numpy as np
 from random import randint
 
@@ -59,6 +59,7 @@ def get_img(post):
         product_ids = [image_id[2:] for image_id in image_ids]
 
         images = [IMG_URL.format(product_id) for product_id in product_ids]
+        images = ", ".join(images)
 
     except:
         images = np.NaN
@@ -75,6 +76,16 @@ def get_id(post):
     else:
         return post.get('data-pid')
 
+def get_last_seen():
+
+    """
+    Retrieves the date on which the listing was found the latest.
+    """
+
+    return time.asctime( time.localtime(time.time()))
+
+
+
 names = []
 prices = []
 dates = []
@@ -82,14 +93,16 @@ locations = []
 urls = []
 imgs = []
 ids = []
+last_seen = []
 
-data = {'id':       ids,
-        'name':     names,
-        'price':    prices,
-        'date':     dates,
-        'location': locations,
-        'url':      urls,
-        'images':   imgs}
+data = {'id':        ids,
+        'name':      names,
+        'price':     prices,
+        'date':      dates,
+        'location':  locations,
+        'url':       urls,
+        'images':    imgs,
+        'last_seen': last_seen}
 
 def get_all_page(posts):
     for post in posts:
@@ -100,6 +113,7 @@ def get_all_page(posts):
         urls.append(get_url(post))
         imgs.append(get_img(post))
         ids.append(get_id(post))
+        last_seen.append(get_last_seen())
 
 
 URL = 'https://sandiego.craigslist.org/search/sss?query=desk+chair&sort=rel&s='
@@ -123,22 +137,18 @@ def search_all_pages():
         total_count = html_soup.find('span', class_ = 'totalcount').text
         if n > int(total_count):
             break
-        sleep(randint(1,5))
+        time.sleep(randint(1,5))
 
 search_all_pages()
 current = pd.DataFrame(data = data)
 
-
-
-
-
 past = pd.read_csv('tracking.csv')
-cols = ['names', 'prices', 'dates', 'locations', 'urls', 'imgs', 'ids']
+cols = ['id', 'name', 'price', 'date', 'location', 'url', 'images']
 
 duplicate_old = past.merge(current, how = 'left', on = cols).dropna().drop('last_seen_y', axis = 1)
 duplicate_old = duplicate_old.rename(columns = {'last_seen_x':'last_seen'})
 
-past_unique = pd.concat([past, duplicate_old, duplicate_old]).drop_duplicates(keep = False)
+past_unique = pd.concat([past, duplicate_old, duplicate_old], sort = True).drop_duplicates(keep = False)
 
-combined = pd.concat([past_unique, current])
+combined = pd.concat([past_unique, current], sort = True)
 combined.to_csv('tracking.csv')
