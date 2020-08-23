@@ -1,3 +1,6 @@
+### Please read my blogpost on this subject  
+https://taekunkim.wordpress.com/2020/08/22/web-scraping-craigslist/
+
 ### ⚠️ 
 ### The Python script is dependant on the html structure of Craigslist.  
 The script may not work if Craigslist changes its html structure from what it had on August 11, 2020.
